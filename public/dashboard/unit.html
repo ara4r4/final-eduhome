@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>EduHome Teachers - Units</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="shortcut icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts">
+<style>
+    body{
+        color: white;
+    }
+    input, select{
+        color: white;
+    }
+            #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background-color: transparent;
+        }
+
+        #add-question, #questions-table {
+    background-color: transparent;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: auto; /* Change width to auto */
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    min-width: 300px; /* Set a minimum width if needed */
+}
+
+#questions-table, #add-question {
+    background-color: transparent;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Change width to auto */
+    box-sizing: border-box;
+    min-width: 600px; /* Set a minimum width if needed */
+}
+        label {
+            font-weight: bold;
+        }
+
+        input, select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            border: 1px solid #1d283c;
+            border-radius: 5px;
+            background-color: #1d283c;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+</style>
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div class="app-container">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="app-icon">
+       <img src="/public/assets/images/eduhome.png" alt="" style="width: 100px;  display: block;
+       margin-left: auto;
+       margin-right: auto;
+       width: 50%;">
+      </div>
+    </div>
+    <ul class="sidebar-list">
+      <li class="sidebar-list-item ">
+        <a href="./home.html">
+          <ion-icon name="home"></ion-icon>
+          <span>Home</span>
+        </a>
+      </li>
+      <li class="sidebar-list-item">
+        <a href="./questions.html">
+          <ion-icon name="help"></ion-icon>
+          <span>Questions</span>
+        </a>
+      </li>
+      <li class="sidebar-list-item">
+        <a href="./add-question.html">
+          <ion-icon name="create"></ion-icon>
+          <span>Editing Questions</span>
+        </a>
+      </li>
+      <li class="sidebar-list-item">
+        <a href="./quizhub.html">
+          <ion-icon name="git-pull-request"></ion-icon>
+          <span>Quiz Hub</span>
+        </a>
+      </li>
+      <li class="sidebar-list-item">
+        <a href="./pdf.html">
+          <ion-icon name="folder-open"></ion-icon>
+          <span>PDFs</span>
+        </a>
+      </li>
+      <li class="sidebar-list-item active">
+        <a href="./unit.html">
+          <ion-icon name="copy"></ion-icon>
+          <span>Units</span>
+        </a>
+      </li>
+      <li class="sidebar-list-item">
+        <a href="./announcements.html">
+            <ion-icon name="megaphone"></ion-icon>
+          <span>Announcements</span>
+        </a>
+      </li>
+      <li class="sidebar-list-item">
+        <a href="./add-announcement.html">
+            <ion-icon name="add-circle"></ion-icon>
+          <span>Sending Messages</span>
+        </a>
+      </li>
+    </ul>
+    <div class="account-info">
+      <div class="account-info-picture">
+        <img src="../assets/images/user.png" alt="Account">
+      </div>
+      <div class="account-info-name" id="username"></div>
+     
+      <div id="username" ><ion-icon name="log-out-outline" class="log-out-icon" onclick="logout()"></ion-icon></div>
+      
+      
+    </div>
+  </div>
+  <div class="app-content">
+    <div class="app-content-header">
+      <h1 class="app-content-headerText">Units</h1>
+    </div>
+    <div class="container">
+        <div id="add-question">
+            <form id="form">
+        <label for="name">Name of part:</label>
+        <input type="text" id="name" required>
+        <label for="number">Number of part:</label>
+        <input type="text" id="number" required placeholder="(4, 5...)">
+        <button type="submit">Create</button>
+   
+</form>
+<h3>Note: after adding a unit, or a lesson or a part of the book, we cannot change it</h3>
+<h2 style="text-align: left;">ئاگاداری: دوای دانانی ئونتێک، یان وانەیەک یان بەشێک لە کتێبەکە، ناتوانین بیگۆرین، واتا گۆرینی تیا نییە</h2>
+</div>
+</div>
+<script src="../assets/js/dashboard.js"></script>
+    <script src="../assets/js/getTopic.js"></script>
+    <script>
+        async function tets(){
+            const i = getCookie("EDUHOME-COOKIE")
+            const secret = `>#jc=Wer6WkmN9vb<Ue1(363($Griz`
+            
+            const topic = await getTopic(i)
+            fetch('/get-units', {
+      method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ secret, topic })
+    })
+        .then((response) => response.json())
+        .then((orders) => {
+            const nameInput = document.getElementById("name");
+            if(orders.length == 0){
+                nameInput.disabled = false;
+                nameInput.placeholder = "(chapter, unit..)"
+            }else{
+                nameInput.disabled = true;
+                nameInput.value = `${orders[0].name}`
+            }
+            console.log(orders)
+        })
+        }
+        tets()
+
+        document.getElementById('form').addEventListener('submit', async function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Get form values
+    var name = document.getElementById('name').value;
+    var number = document.getElementById('number').value;
+
+
+    // Call saveQuestion function
+    await saveQuestion(name, number);
+});
+
+
+async function saveQuestion(name, number) {
+    const cookie = getCookie('EDUHOME-COOKIE');
+    const topic = await getTopic(cookie)
+    
+    const secret = ">#jc=Wer6WkmN9vb<Ue1(363($Griz"
+    fetch('/add-unit', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ secret, topic, name, number })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Successfully saved");
+            window.location.reload();
+        } else {
+            alert("Error saving");
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+    </script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</body>
+</html>

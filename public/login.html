@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="./assets/css/account-generation.css">
+    <link rel="shortcut icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+    <style>
+        .submit:hover{
+            cursor: pointer;
+            transform: scale(1.05);
+            transition: .5s;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="margin: auto;">
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <form class="form" onsubmit="handleLogin(event)">
+            <p class="form-title">Log in to your account</p>
+            <div class="input-container">
+                <input placeholder="Enter username or email" type="text" name="usernameOrEmail" required>
+                <span>
+                    <svg stroke="currentColor" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                            stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+                    </svg>
+                </span>
+            </div>
+            <div class="input-container">
+                <input placeholder="Enter password" type="password" name="password" id="password" required>
+                <span id="show" onmousedown="showPassword()" onmouseup="hidePassword()"
+                    ontouchstart="showPassword()" ontouchend="hidePassword()" class="show">
+                    <svg stroke="currentColor" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+                        <path
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+                    </svg>
+                </span>
+            </div>
+            <div id="error-message" class="error-message" style="color: #cc0000;"></div>
+            <button class="submit" type="submit">Log in</button>
+            <p class="signup-link">No account? <a href="signup.html">Sign up</a></p>
+        </form>
+    </div>
+   
+    <script>
+        function getRoleByUsername(cookie) {
+    if (!cookie) return alert("NO COOKIE PROVIDED");
+
+    const response = fetch('/get-role-by-username', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ secret: ">#jc=Wer6WkmN9vb<Ue1(363($Griz", username: cookie })
+    });
+
+    return response
+        .then(res => res.json())
+        .then(data => data.role || null)
+        .catch(error => {
+            console.error('Error:', error);
+            return null;
+        });
+}
+        async function getRole(cookie){
+    if(!cookie) return alert("NO COOKIE PROVIDED");
+    
+    const response = await fetch('/get-role', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ secret: ">#jc=Wer6WkmN9vb<Ue1(363($Griz", cookie: cookie })
+    });
+    
+    const data = await response.json();
+    const username = data.role;
+    
+    return username || null;
+}
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+     
+        document.addEventListener('DOMContentLoaded', async function () {
+            const cookie = getCookie('EDUHOME-COOKIE');
+            if (cookie) {
+                const role = await getRole(cookie);
+               if(role=="teacher"){
+                    window.location.href = "./dashboard/home.html"
+                }
+                else if(role =="admin" || role =="staff"){
+                    window.location.href = "./admin/home.html"
+                }
+                else{
+                    window.location.href = "./notyet.html"
+                }
+                
+            }
+        });
+
+        function showPassword() {
+            var passwordInput = document.getElementById("password");
+            passwordInput.type = "text";
+        }
+
+        function hidePassword() {
+            var passwordInput = document.getElementById("password");
+            passwordInput.type = "password";
+        }
+
+        // Function to display the error message
+        function showError(errorMessage) {
+            var errorContainer = document.getElementById("error-message");
+            errorContainer.innerHTML = errorMessage;
+            errorContainer.style.display = "block";
+        }
+
+        function handleLogin(event) {
+          event.preventDefault()
+           
+    var errorContainer = document.getElementById("error-message");
+    errorContainer.style.display = "none";
+
+    var formData = new FormData(document.querySelector("form"));
+    const usernameOrEmail = formData.get("usernameOrEmail");
+    const password = formData.get("password");
+            
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ usernameOrEmail, password })
+    })
+        .then(response => {
+            if(response.status === 200) {
+                getRoleByUsername(usernameOrEmail).then(username => {
+                    const role = username
+
+                 if(role == "teacher" || role =="Teacher"){
+                window.location.href = "dashboard/home.html"
+                 }else if(role =="staff" || role == "Staff" || role =="Admin" || role == "admin"){
+                    window.location.href = "admin/home.html"
+                 }else{
+                    window.location.href = "students/main.html"
+                 }
+            });
+            } else if (response.status === 401) {
+                response.json().then(data => {
+                    showError(data.message);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Login error:', error);
+        });
+}
+
+    </script>
+
+</body>
+
+</html>

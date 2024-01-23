@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Page</title>
+    <link rel="stylesheet" href="./assets/css/account-generation.css">
+    <link rel="shortcut icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+
+</head>
+<body>
+    <div style="margin: auto;">
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <form class="form" onsubmit="createUser(event)">
+            <p class="form-title">Sign Up</p>
+            <div class="input-container">
+                <input placeholder="Enter username (max 14 characters)" type="text" name="username" required id="username" maxlength="14">
+                <span>
+                    <svg stroke="currentColor" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Add an icon if you want -->
+                    </svg>
+                </span>
+            </div>
+            <div class="input-container">
+                <input placeholder="Enter password (at least 6 characters)" type="password" name="password" id="password" required minlength="6">
+                <span id="show" onmousedown="showPassword()" onmouseup="hidePassword()" ontouchstart="showPassword()" ontouchend="hidePassword()" class="show">
+                    <svg stroke="currentColor" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+                    </svg>
+                </span>
+            </div>
+            <!-- Added email input field -->
+            <div class="input-container">
+                <input placeholder="Enter email" type="email" name="email" required id="email">
+                <span>
+                    <svg stroke="currentColor" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Add an icon if you want -->
+                    </svg>
+                </span>
+            </div>
+            <button class="submit" type="submit">Sign Up</button>
+            <p class="signup-link">
+                Already have an account?
+                <a href="login.html">Log in</a>
+            </p>
+        </form>
+    </div>
+    <script>
+        function showPassword() {
+            var passwordInput = document.getElementById("password");
+            passwordInput.type = "text";
+        }
+
+        function hidePassword() {
+            var passwordInput = document.getElementById("password");
+            passwordInput.type = "password";
+        }
+
+        async function createUser(event) {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const email = document.getElementById("email").value;
+
+            // Validate username, password, and email
+            if (username.length > 14) {
+                alert("Username cannot be more than 14 characters");
+                return;
+            }
+
+            if (password.length < 6) {
+                alert("Password must be at least 6 characters long");
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                alert("Please enter a valid email address");
+                return;
+            }
+
+            try {
+                await createUserToDatabase(username, password, email, "user", "none");
+                console.log('User created');
+            } catch (error) {
+                alert(error.error); // Display the error message in an alert
+            }
+        }
+
+        function isValidEmail(email) {
+            // This is a simple email validation, you may want to use a more robust method
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        const secret1 = `>#jc=Wer6WkmN9vb<Ue1(363($Griz`
+        async function createUserToDatabase(username, password, email, role, teachingTopic, secret) {
+            const userData = {
+                username,
+                password,
+                email,
+                role,
+                teachingTopic,
+                secret, // Add the secret to the user data,
+                secret1
+            };
+
+            try {
+                const response = await fetch('/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData),
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.json();
+                    alert(errorMessage.error);
+                    return;
+                }
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    const responseData = await response.json();
+                    return responseData;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                throw error;
+            }
+        }
+    </script>
+
+<script>
+     
+    function getCookie(name) {
+   const value = `; ${document.cookie}`;
+   const parts = value.split(`; ${name}=`);
+   if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+   const cookie = getCookie('EDUHOME-COOKIE');
+   if (cookie) {
+       window.location.href = "login.html";
+   }
+});
+   
+   </script>
+</body>
+</html>
